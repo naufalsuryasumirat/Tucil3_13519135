@@ -1,14 +1,18 @@
 import java.util.PriorityQueue;
 import java.util.Comparator;
 import java.lang.Math;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class Node {
     private String name;
-    private PriorityQueue<TupleNode> cNodes;
+    // private PriorityQueue<TupleNode> cNodes; // TEST
+    private ArrayList<TupleNode> cNodes;
     private Node fromNode;
     private Coordinate coordinate;
     public Node(String name, Coordinate coordinate) {
-        this.cNodes = new PriorityQueue<TupleNode>(new TupleNodeComparator());
+        // this.cNodes = new PriorityQueue<TupleNode>(new TupleNodeComparator()); // TEST
+        this.cNodes = new ArrayList<TupleNode>();
         this.name = name;
         this.fromNode = null;
         this.coordinate = coordinate;
@@ -33,6 +37,8 @@ public class Node {
         Double distance = getCoordinate().HaversineEuclideanDistance(node.getCoordinate());
         node.cNodes.add(new TupleNode(this, distance));
         this.cNodes.add(new TupleNode(node, distance));
+        Collections.sort(node.cNodes);
+        Collections.sort(this.cNodes);
     }
     public void addConnection(Node node, Double distance) {
         if (getName() == node.getName()) return; // Guard jika menambah koneksi ke diri sendiri
@@ -41,8 +47,13 @@ public class Node {
         }
         node.cNodes.add(new TupleNode(this, distance));
         this.cNodes.add(new TupleNode(node, distance));
+        Collections.sort(node.cNodes);
+        Collections.sort(this.cNodes);
     }
-    public PriorityQueue<TupleNode> getConnectedNodes() {
+    // public PriorityQueue<TupleNode> getConnectedNodes() { // TEST
+    //     return this.cNodes;
+    // }
+    public ArrayList<TupleNode> getConnectedNodes() {
         return this.cNodes;
     }
     public void printInfo() {
@@ -66,7 +77,7 @@ public class Node {
     }
 }
 
-class TupleNode {
+class TupleNode implements Comparable<TupleNode> {
     private Node node;
     private Double distance;
     public TupleNode(Node node, Double distance) {
@@ -81,6 +92,11 @@ class TupleNode {
     }
     public void printInfo() {
         System.out.print("(" + getNode().getName() + ", " + getDistance() + ")");
+    }
+    public int compareTo(TupleNode tn) {
+        if (this.getDistance() > tn.getDistance()) return 1;
+        else if (this.getDistance() < tn.getDistance()) return -1;
+        else return 0;
     }
 }
 
@@ -121,8 +137,10 @@ class Coordinate {
 class TupleNodeComparator implements Comparator<TupleNode> {
     @Override
     public int compare(TupleNode tn1, TupleNode tn2) {
-        if (tn1.getDistance() > tn2.getDistance()) return 1;
-        else if (tn1.getDistance() < tn2.getDistance()) return -1;
-        return 0;
+        // if (tn1.getDistance() > tn2.getDistance()) return 1;
+        if (tn1.getDistance().compareTo(tn2.getDistance()) < 0) return -1;
+        // else if (tn1.getDistance() < tn2.getDistance()) return -1;
+        else if (tn1.getDistance().compareTo(tn2.getDistance()) > 0) return 1;
+        else return 0;
     }
 }
